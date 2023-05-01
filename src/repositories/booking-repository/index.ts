@@ -54,8 +54,7 @@ async function updateBooking(roomId: number, bookingId: number) {
       id: bookingId,
     },
     data: {
-      roomId: roomId,
-      updatedAt: dayjs().format('YYYY-MM-DD'),
+      roomId,
     },
     select: {
       id: true,

@@ -1,7 +1,14 @@
 import supertest from 'supertest';
 import httpStatus from 'http-status';
 import faker from '@faker-js/faker';
-import { createEnrollmentWithAddress, createUser, createTicket } from '../factories';
+import {
+  createEnrollmentWithAddress,
+  createUser,
+  createTicket,
+  createTicketTypeWithHotel,
+  createRoomWithHotelId,
+  createPayment,
+} from '../factories';
 import { cleanDb, generateValidToken } from '../helpers';
 import {
   createHotel,
@@ -9,7 +16,7 @@ import {
   createIsIncludedHotelWithTrueTicketType,
   createRoom,
 } from '../factories/hotels-factory';
-import { createBookingTest } from '../factories/booking-factory';
+import { createBookingTest, createBooking } from '../factories/booking-factory';
 import app, { init } from '@/app';
 
 beforeAll(async () => {
@@ -63,6 +70,26 @@ describe('POST /booking', () => {
 
     const result = await server.post('/booking').set('Authorization', `Bearer ${token}`).send({ roomId: room.id });
 
-    expect(result.status).toEqual(httpStatus.CREATED);
+    expect(result.status).toEqual(httpStatus.OK);
+  });
+});
+
+describe('PUT /booking/:booking', () => {
+  it('Atualiza o booking quando o token é válido', async () => {
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const enrollment = await createEnrollmentWithAddress(user);
+    const ticketType = await createTicketTypeWithHotel();
+    const ticket = await createTicket(enrollment.id, ticketType.id, 'PAID');
+    const payment = await createPayment(ticket.id, ticketType.price);
+    const hotel = await createHotel();
+    const room = await createRoom(hotel.id);
+    const otherRoom = await createRoomWithHotelId(hotel.id);
+    const booking = await createBooking(room.id, user.id);
+    const result = await server.put(`/booking/${booking.id}`).set('Authorization', `Bearer ${token}`).send({
+      roomId: otherRoom.id,
+    });
+
+    expect(result.status).toBe(httpStatus.OK);
   });
 });
