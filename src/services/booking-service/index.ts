@@ -20,6 +20,8 @@ async function createBooking(userId: number, roomId: number) {
   if (ticket.status !== 'PAID' || ticketType.includesHotel !== true || ticketType.isRemote === true) {
     throw forbiddenError();
   }
+  const bookingByRoomId = await bookingRepository.findBookingByRoomId(roomId);
+  if (bookingByRoomId.length === roomById.capacity) throw forbiddenError();
 
   const booking = await bookingRepository.createBooking(userId, roomId);
 

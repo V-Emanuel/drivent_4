@@ -15,6 +15,7 @@ import {
   createIsIncludedHotelWithFalseTicketType,
   createIsIncludedHotelWithTrueTicketType,
   createRoom,
+  createRemotTicketTypeTrue,
 } from '../factories/hotels-factory';
 import { createBookingTest, createBooking } from '../factories/booking-factory';
 import app, { init } from '@/app';
@@ -71,6 +72,45 @@ describe('POST /booking', () => {
     const result = await server.post('/booking').set('Authorization', `Bearer ${token}`).send({ roomId: room.id });
 
     expect(result.status).toEqual(httpStatus.OK);
+  }),
+    it('Retorna status 403 se o ticket do usuário é remoto', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const ticketType = await createRemotTicketTypeTrue();
+      const enrollment = await createEnrollmentWithAddress(user);
+      await createTicket(enrollment.id, ticketType.id, 'PAID');
+      const hotel = await createHotel();
+      const room = await createRoom(hotel.id);
+
+      const result = await server.post('/booking').set('Authorization', `Bearer ${token}`).send({ roomId: room.id });
+
+      expect(result.status).toEqual(httpStatus.FORBIDDEN);
+    }),
+    it('Retorna status 403 se o ticket do usuário não foi pago', async () => {
+      const user = await createUser();
+      const token = await generateValidToken(user);
+      const ticketType = await createIsIncludedHotelWithTrueTicketType();
+      const enrollment = await createEnrollmentWithAddress(user);
+      await createTicket(enrollment.id, ticketType.id, 'RESERVED');
+      const hotel = await createHotel();
+      const room = await createRoom(hotel.id);
+
+      const result = await server.post('/booking').set('Authorization', `Bearer ${token}`).send({ roomId: room.id });
+
+      expect(result.status).toEqual(httpStatus.FORBIDDEN);
+    });
+  it('Retorna status 403 se o ticket não inclui hotel', async () => {
+    const user = await createUser();
+    const token = await generateValidToken(user);
+    const ticketType = await createIsIncludedHotelWithFalseTicketType();
+    const enrollment = await createEnrollmentWithAddress(user);
+    await createTicket(enrollment.id, ticketType.id, 'PAID');
+    const hotel = await createHotel();
+    const room = await createRoom(hotel.id);
+
+    const result = await server.post('/booking').set('Authorization', `Bearer ${token}`).send({ roomId: room.id });
+
+    expect(result.status).toEqual(httpStatus.FORBIDDEN);
   });
 });
 
