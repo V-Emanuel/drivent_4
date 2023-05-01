@@ -1,5 +1,5 @@
-import { Booking, Room } from '@prisma/client';
-import dayjs = require('dayjs');
+import { Room, Booking } from '@prisma/client';
+import dayjs from 'dayjs';
 import { prisma } from '@/config';
 
 async function findBooking(userId: number) {
@@ -13,16 +13,20 @@ async function findBooking(userId: number) {
     },
   });
 }
-async function createBooking(userId: number, roomId: number): Promise<Booking> {
-  return prisma.booking.create({
+async function createBooking(userId: number, roomId: number): Promise<idType> {
+  return await prisma.booking.create({
     data: {
-      userId: userId,
-      roomId: roomId,
-      createdAt: dayjs().format('YYYY-MM-DD'),
-      updatedAt: dayjs().format('YYYY-MM-DD'),
+      userId,
+      roomId,
+    },
+    select: {
+      id: true,
     },
   });
 }
+export type idType = {
+  id: number;
+};
 
 async function findRoomById(roomId: number): Promise<Room> {
   return await prisma.room.findFirst({

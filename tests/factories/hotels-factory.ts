@@ -21,6 +21,17 @@ export async function createRoomWithHotelId(hotelId: number) {
   });
 }
 
+export async function createIsIncludedHotelWithTrueTicketType() {
+  return prisma.ticketType.create({
+    data: {
+      name: faker.name.findName(),
+      price: faker.datatype.number(),
+      isRemote: false,
+      includesHotel: true,
+    },
+  });
+}
+
 export async function createIsIncludedHotelWithFalseTicketType() {
   return prisma.ticketType.create({
     data: {

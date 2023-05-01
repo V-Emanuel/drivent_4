@@ -1,7 +1,7 @@
 import bookingRepository from '@/repositories/booking-repository';
 import ticketsRepository from '@/repositories/tickets-repository';
 import enrollmentRepository from '@/repositories/enrollment-repository';
-import { notFoundError, forbiddenError, paymentRequiredError } from '@/errors';
+import { notFoundError, forbiddenError } from '@/errors';
 
 async function getBooking(userId: number) {
   const booking = await bookingRepository.findBooking(userId);
@@ -16,9 +16,9 @@ async function createBooking(userId: number, roomId: number) {
 
   const ticketType = await ticketsRepository.findTicketTypeById(ticket.ticketTypeId);
 
-  if (!enrollment || !ticket || !roomById) throw notFoundError();
+  if (!roomById) throw notFoundError();
   if (ticket.status !== 'PAID' || ticketType.includesHotel !== true || ticketType.isRemote === true) {
-    throw paymentRequiredError();
+    throw forbiddenError();
   }
 
   const booking = await bookingRepository.createBooking(userId, roomId);
@@ -27,7 +27,6 @@ async function createBooking(userId: number, roomId: number) {
     bookingId: booking.id,
   };
 }
-
 async function updateBooking(userId: number, roomId: number, bookingId: number) {
   const booking = await bookingRepository.findBookingByUserId(userId);
   if (!booking) throw forbiddenError();
