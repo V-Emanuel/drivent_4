@@ -20,3 +20,24 @@ export async function createRoomWithHotelId(hotelId: number) {
     },
   });
 }
+
+export async function createIsIncludedHotelWithFalseTicketType() {
+  return prisma.ticketType.create({
+    data: {
+      name: faker.name.findName(),
+      price: faker.datatype.number(),
+      isRemote: false,
+      includesHotel: false,
+    },
+  });
+}
+
+export async function createRoom(hotelId: number) {
+  return prisma.room.create({
+    data: {
+      name: 'bigRoom',
+      capacity: 4,
+      hotelId,
+    },
+  });
+}

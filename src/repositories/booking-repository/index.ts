@@ -3,22 +3,16 @@ import dayjs = require('dayjs');
 import { prisma } from '@/config';
 
 async function findBooking(userId: number) {
-  const booking = await prisma.booking.findFirst({
+  return await prisma.booking.findFirst({
     where: {
-      id: userId,
+      userId,
+    },
+    select: {
+      id: true,
+      Room: true,
     },
   });
-  const rooms = await prisma.room.findFirst({
-    where: {
-      id: booking.roomId,
-    },
-  });
-  return {
-    id: booking.id,
-    Room: rooms,
-  };
 }
-
 async function createBooking(userId: number, roomId: number): Promise<Booking> {
   return prisma.booking.create({
     data: {

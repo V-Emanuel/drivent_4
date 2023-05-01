@@ -4,8 +4,6 @@ import enrollmentRepository from '@/repositories/enrollment-repository';
 import { notFoundError, forbiddenError, paymentRequiredError } from '@/errors';
 
 async function getBooking(userId: number) {
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-  if (!enrollment) throw notFoundError();
   const booking = await bookingRepository.findBooking(userId);
   if (!booking) throw notFoundError();
 
